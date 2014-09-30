@@ -1,41 +1,84 @@
 var _ = require('underscore');
-var fs = require('fs');
-var path = require('path');
+var util = require('util');
+var fileFinder = require('./app/FileFinder.js');
 
-var targetDir = '/Users/scott/code/_tmp';
+var targetDirectory = '/home/ubuntu/workspace/node_modules';
+var sourceDirectory = '/home/ubuntu/workspace/node_modules-copy-1';
 
-var recursiveReadFiles = function(directory, results, callback) {
-    fs.readdir(directory, function(err, files) {
-        if (err) return callback(err);
+var targetFiles;
+var sourceFiles;
 
-        // completion callbacks
-        var finishedLevel = _.after(files.length, callback);
+// wait for 2 foundFiles() calls (one for target, one for source)
+var foundFiles = _.after(2, checkFiles);
 
-        // iterate asynchronously over each file, _.after will co-ordinate
-        // callback call at the end
-        files.forEach(function(file) {
-            var fullFilePath = path.join(directory, file);
-            fs.stat(fullFilePath, function(err, stat) {
-                if (err) return callback(err);
-                if (stat.isDirectory()) {
-                    recursiveReadFiles(fullFilePath, results, finishedLevel);
-                }
-                else {
-                    results.push(fullFilePath);
-                    finishedLevel();
-                }
-            });
-        });
-    });
-};
-
-var results = [ ];
-recursiveReadFiles(targetDir, results, function(err, files) {
-    if (err) {
-        console.log('ERROR: ' + err);
-        return;
-    }
-    results.forEach(function(file) {
-        console.log(file);
-    });
+fileFinder.findFiles(targetDirectory, function(err, files) {
+    if (err) return handleError(err);
+    targetFiles = files;
+    foundFiles();
 });
+fileFinder.findFiles(sourceDirectory, function(err, files) {
+    if (err) return handleError(err);
+    sourceFiles = files;
+    foundFiles();
+});
+
+function checkFiles() {
+    // compile some lookups hashes
+    var targetLookup = {};
+    targetFiles.forEach(function(file) {
+        file.key = file.path.replace(targetDirectory, '');
+        targetLookup[file.key] = file;
+    });
+    var sourceLookup = {};
+    sourceFiles.forEach(function(file) {
+        file.key = file.path.replace(sourceDirectory, '');
+        sourceLookup[file.key] = file;
+    });
+
+    // check each source file (we'll deal with duplicates in the target
+    // directory later)
+    var newSourceFiles = [];
+    var newerSourceFiles = [];
+    var differentNotNewerSourceFiles = [];
+    var duplicates = [];
+    for (var sourceKey in sourceLookup) {
+        var source = sourceLookup[sourceKey];
+        var target = targetLookup[sourceKey];
+        if (target === undefined) {
+            newSourceFiles.push(source);
+        }
+        else if (source.stat.mtime > target.stat.mtime) {
+            newerSourceFiles.push(source);
+        }
+        else if (source.stat.size != target.stat.size) {
+            differentNotNewerSourceFiles.push(source);
+        }
+        else {
+            duplicates.push(source);
+        }
+    }
+    
+    newSourceFiles.forEach(function(file) {
+        console.log('NEW: ' + file.path);
+        // new so copy
+    });
+    console.log();
+    newerSourceFiles.forEach(function(file) {
+        console.log('NEWER: ' + file.path);
+        // newer so copy
+    });
+    console.log();
+    differentNotNewerSourceFiles.forEach(function(file) {
+        console.log('DIFFERENT (MANUAL CHECK): ' + file.path);
+        // manually check
+    });
+    console.log();
+    duplicates.forEach(function(file) {
+        console.log('DUPLICATE: ' + file.path);
+        // no-op
+    });
+}
+
+function handleError(err) {
+    console.log('ERROR: ' + err);
+}

@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/scottdupoy/fs-deduplicator/issues"
   },
-  "homepage": "https://github.com/scottdupoy/fs-deduplicator"
+  "homepage": "https://github.com/scottdupoy/fs-deduplicator",
+  "dependencies": {
+    "underscore": "^1.7.0"
+  }
 }
