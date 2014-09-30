@@ -8,6 +8,7 @@ module.exports.findFiles = function(directory, callback) {
 };
 
 function recursiveFindFiles(directory, results, callback) {
+    console.log('Finding files in directory: ' + directory);
     fs.readdir(directory, function(err, files) {
         if (err) return callback(err);
 
@@ -26,8 +27,10 @@ function recursiveFindFiles(directory, results, callback) {
                     recursiveFindFiles(fullFilePath, results, finishedLevel);
                 }
                 else {
-                    var key = '';
                     results.push({ path: fullFilePath, directory: directory, name: file, stat: stat });
+                    if (results.length % 100 == 0) {
+                        console.log('results.length = ' + results.length);
+                    }
                     finishedLevel();
                 }
             });

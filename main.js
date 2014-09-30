@@ -2,8 +2,8 @@ var _ = require('underscore');
 var util = require('util');
 var fileFinder = require('./app/FileFinder.js');
 
-var targetDirectory = '/home/ubuntu/workspace/node_modules';
-var sourceDirectory = '/home/ubuntu/workspace/node_modules-copy-1';
+var targetDirectory = '/Volumes/Public/hard-disks/_sorted_and_keep/Pictures/13_2010';
+var sourceDirectory = '/Volumes/Public/hard-disks/_to_merge_01/13_2010';
 
 var targetFiles;
 var sourceFiles;
@@ -24,6 +24,7 @@ fileFinder.findFiles(sourceDirectory, function(err, files) {
 
 function checkFiles() {
     // compile some lookups hashes
+    console.log('-----------------------------------------------------');
     var targetLookup = {};
     targetFiles.forEach(function(file) {
         file.key = file.path.replace(targetDirectory, '');
