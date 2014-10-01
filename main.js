@@ -2,8 +2,10 @@ var _ = require('underscore');
 var util = require('util');
 var fileFinder = require('./app/FileFinder.js');
 
-var targetDirectory = '/Volumes/Public/hard-disks/_sorted_and_keep/Pictures/13_2010';
-var sourceDirectory = '/Volumes/Public/hard-disks/_to_merge_01/13_2010';
+//var targetDirectory = '/Volumes/Public/hard-disks/_sorted_and_keep/Pictures/13_2010';
+//var sourceDirectory = '/Volumes/Public/hard-disks/_to_merge_01/13_2010';
+var targetDirectory = '/home/ubuntu/workspace/node_modules';
+var sourceDirectory = '/home/ubuntu/workspace/node_modules-copy-1';
 
 var targetFiles;
 var sourceFiles;
@@ -23,17 +25,14 @@ fileFinder.findFiles(sourceDirectory, function(err, files) {
 });
 
 function checkFiles() {
-    // compile some lookups hashes
-    console.log('-----------------------------------------------------');
+    // build some lookups hashes
     var targetLookup = {};
     targetFiles.forEach(function(file) {
-        file.key = file.path.replace(targetDirectory, '');
-        targetLookup[file.key] = file;
+        targetLookup[file.relativePath] = file;
     });
     var sourceLookup = {};
     sourceFiles.forEach(function(file) {
-        file.key = file.path.replace(sourceDirectory, '');
-        sourceLookup[file.key] = file;
+        sourceLookup[file.relativePath] = file;
     });
 
     // check each source file (we'll deal with duplicates in the target
@@ -48,35 +47,32 @@ function checkFiles() {
         if (target === undefined) {
             newSourceFiles.push(source);
         }
-        else if (source.stat.mtime > target.stat.mtime) {
+        else if (source.modified > target.modified) { // could add some tolerance
             newerSourceFiles.push(source);
         }
-        else if (source.stat.size != target.stat.size) {
+        else if (source.size != target.size) {
             differentNotNewerSourceFiles.push(source);
         }
         else {
             duplicates.push(source);
         }
     }
-    
+
     newSourceFiles.forEach(function(file) {
-        console.log('NEW: ' + file.path);
+        console.log('NEW:                      ' + file.path);
         // new so copy
     });
-    console.log();
     newerSourceFiles.forEach(function(file) {
-        console.log('NEWER: ' + file.path);
+        console.log('NEWER:                    ' + file.path);
         // newer so copy
     });
-    console.log();
     differentNotNewerSourceFiles.forEach(function(file) {
         console.log('DIFFERENT (MANUAL CHECK): ' + file.path);
         // manually check
     });
-    console.log();
     duplicates.forEach(function(file) {
-        console.log('DUPLICATE: ' + file.path);
-        // no-op
+        console.log('DUPLICATE OR OLDER:       ' + file.path);
+        // no-op, could check sizes are the same
     });
 }
 
