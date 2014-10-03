@@ -2,10 +2,10 @@ var _ = require('underscore');
 var util = require('util');
 var fileFinder = require('./app/FileFinder.js');
 
-//var targetDirectory = '/Volumes/Public/hard-disks/_sorted_and_keep/Pictures/13_2010';
-//var sourceDirectory = '/Volumes/Public/hard-disks/_to_merge_01/13_2010';
-var targetDirectory = '/home/ubuntu/workspace/node_modules';
-var sourceDirectory = '/home/ubuntu/workspace/node_modules-copy-1';
+var targetDirectory = '/Volumes/Public/hard-disks/_sorted_and_keep/Pictures/13_2010';
+var sourceDirectory = '/Volumes/Public/hard-disks/_to_merge_01/13_2010';
+//var targetDirectory = '/home/ubuntu/workspace/node_modules';
+//var sourceDirectory = '/home/ubuntu/workspace/node_modules-copy-1';
 
 var targetFiles;
 var sourceFiles;
@@ -15,14 +15,15 @@ var foundFiles = _.after(2, checkFiles);
 
 fileFinder.findFiles(targetDirectory, function(err, files) {
     if (err) return handleError(err);
+    console.log('findFiles completed for: ' + targetDirectory);
     targetFiles = files;
     foundFiles();
 });
-fileFinder.findFiles(sourceDirectory, function(err, files) {
-    if (err) return handleError(err);
-    sourceFiles = files;
-    foundFiles();
-});
+//fileFinder.findFiles(sourceDirectory, function(err, files) {
+//    if (err) return handleError(err);
+//    sourceFiles = files;
+//    foundFiles();
+//});
 
 function checkFiles() {
     // build some lookups hashes

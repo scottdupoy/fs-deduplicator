@@ -1,6 +1,7 @@
 var fileFinder = require('./app/FileFinder.js');
 
-var targetDirectory = '/home/ubuntu/workspace/node_modules';
+//var targetDirectory = '/home/ubuntu/workspace/node_modules';
+var targetDirectory = '/Volumes/Public/hard-disks/_sorted_and_keep/Pictures/13_2010';
 
 fileFinder.findFiles(targetDirectory, function(err, files) {
     if (err) return handleError(err);
