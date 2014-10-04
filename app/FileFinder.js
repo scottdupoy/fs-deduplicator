@@ -1,64 +1,87 @@
 var child_process = require('child_process');
+var _ = require('underscore');
 
-module.exports.findFiles = function(directory, callback) {
+module.exports.findFiles = function(root, callback) {
+    findFilesRecursively(root, root, [], callback);
+};
+
+function findFilesRecursively(root, directory, results, callback) {
     // using the ls command to (hopesfully) avoid calling stat on every file
     // individually. note if this was a real tool directory would be sanitised.
     console.log('Searching directory: ' + directory);
     var command = 'ls -lA ' + directory;
     child_process.exec(command, function(error, stdout, stderr) {
         if (error) return callback(error);
-        parseListingResults(directory, [], stdout, callback);
+        parseListingResults(root, directory, results, stdout, callback);
     });
-};
+}
 
-function parseListingResults(directory, results, listing, callback) {
+function parseListingResults(root, directory, results, listing, callback) {
     var lines = listing.split('\n');
+    var subDirectories = [];
     lines.forEach(function(line) {
         var parts = line.split(/\s+/);
         if (parts.length < 9) {
             return;
         }
-        console.log('TODO: parse: ' + line);
+
+        var entry = getEntry(root, directory, line);
+        if (entry.isDirectory) {
+            subDirectories.push(entry.relativeDirectory);
+        }
+        else {
+            results.push(entry);
+        }
     });
+
+    if (subDirectories.length > 0) {
+        // after subDirectoryCallback has been called <subDirectories.length>
+        // times underscore will call the callback
+        var subDirectoryCallback = _.after(subDirectories.length, function() {
+            callback(null, results);
+        });
+        subDirectories.forEach(function(subDirectory) {
+            findFilesRecursively(root, subDirectory, results, subDirectoryCallback);
+        });
+    }
+    else {
+        callback(null, results);
+    }
 }
 
-// function parseFindResults(directory, listing, callback) {
-//     console.log('Parsing results for directory: ' + directory);
-//     var results = [];
-//     var lines = listing.split('\n');
-//     lines.forEach(function(line) {
-//         if (line.length === 0) {
-//             return;
-//         }
-//         results.push(getFileDetails(directory, line));
-//     });
-//     callback(null, results);
-// }
+function getEntry(root, directory, line) {
+    var groups = /^(.)\S+\s+\S+\s+\S+\s+\S+\s+(\d+)\s+(\d+)\s+(\S+)\s+(\d+)\s+(.*)$/.exec(line);
+    if (groups[1] == 'd') {
+        return {
+            isDirectory: true,
+            relativeDirectory: directory + '/' + groups[6],
+        };
+    }
+    var path = directory + '/' + groups[6];
+    return {
+        isDirectory: false,
+        path: path,
+        root: root,
+        relativePath: path.substring(root.length + 1, path.length),
+        size: parseInt(groups[2]),
+        modified: new Date(groups[5], getMonth(groups[4]) - 1, groups[3]),
+    };
+}
 
-// function getFileDetails(directory, line) {
-//     var parts = line.split(',');
-//     var path = getFilePath(parts);
-//     return {
-//         path: path,
-//         root: directory,
-//         relativePath: path.substring(directory.length + 1),
-//         size: parts[0],
-//         modified: getDate(parts[1]),
-//     };
-// }
-
-// function getDate(dateString) {
-//     var d = dateString.substring(0, 10).split('-');
-//     var t = dateString.substring(11, 19).split(':');
-//     var date = new Date(d[0], d[1] - 1, d[2], t[0], t[1], t[2]);
-//     return date;
-// }
-
-// function getFilePath(parts) {
-//     if (parts.length == 3) {
-//         return parts[2];
-//     }
-//     else {
-//         return parts.slice(2, parts.length).join(',');
-//     }
-// }
+function getMonth(month) {
+    switch(month) {
+        case 'Jan': return 1;
+        case 'Feb': return 2;
+        case 'Mar': return 3;
+        case 'Apr': return 4;
+        case 'May': return 5;
+        case 'Jun': return 6;
+        case 'Jul': return 7;
+        case 'Aug': return 8;
+        case 'Sep': return 9;
+        case 'Oct': return 10;
+        case 'Nov': return 11;
+        case 'Dev': return 12;
+        default: return 1;        
+    }
+}

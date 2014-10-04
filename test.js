@@ -7,11 +7,11 @@ fileFinder.findFiles(targetDirectory, function(err, files) {
     if (err) return handleError(err);
     files.forEach(function(file) {
         console.log('path:         ' + file.path);
-        console.log('root:         ' + file.root);
-        console.log('relativePath: ' + file.relativePath);
-        console.log('size:         ' + file.size);
-        console.log('modified:     ' + file.modified.toISOString());
-        console.log();
+        //console.log('root:         ' + file.root);
+        //console.log('relativePath: ' + file.relativePath);
+        //console.log('size:         ' + file.size);
+        //console.log('modified:     ' + file.modified.toISOString());
+        //console.log();
     });
 });
 

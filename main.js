@@ -15,15 +15,14 @@ var foundFiles = _.after(2, checkFiles);
 
 fileFinder.findFiles(targetDirectory, function(err, files) {
     if (err) return handleError(err);
-    console.log('findFiles completed for: ' + targetDirectory);
     targetFiles = files;
     foundFiles();
 });
-//fileFinder.findFiles(sourceDirectory, function(err, files) {
-//    if (err) return handleError(err);
-//    sourceFiles = files;
-//    foundFiles();
-//});
+fileFinder.findFiles(sourceDirectory, function(err, files) {
+    if (err) return handleError(err);
+    sourceFiles = files;
+    foundFiles();
+});
 
 function checkFiles() {
     // build some lookups hashes
