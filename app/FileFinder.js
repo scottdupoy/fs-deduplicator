@@ -8,8 +8,10 @@ module.exports.findFiles = function(root, callback) {
 function findFilesRecursively(root, directory, results, callback) {
     // using the ls command to (hopesfully) avoid calling stat on every file
     // individually. note if this was a real tool directory would be sanitised.
+    // can't use shelljs because we need to capture the output, including the
+    // file size and modified timestamp.
     console.log('Searching directory: ' + directory);
-    var command = 'ls -lA ' + directory;
+    var command = 'ls -lAT ' + directory;
     child_process.exec(command, function(error, stdout, stderr) {
         if (error) return callback(error);
         parseListingResults(root, directory, results, stdout, callback);
@@ -50,7 +52,7 @@ function parseListingResults(root, directory, results, listing, callback) {
 }
 
 function getEntry(root, directory, line) {
-    var groups = /^(.)\S+\s+\S+\s+\S+\s+\S+\s+(\d+)\s+(\d+)\s+(\S+)\s+(\d+)\s+(.*)$/.exec(line);
+    var groups = /^(.)\S+\s+\S+\s+\S+\s+\S+\s+(\d+)\s+(\d+)\s+(\S+)\s+\d{2}:\d{2}:\d{2}\s(\d{4})\s+(.*)$/.exec(line);
     if (groups[1] == 'd') {
         return {
             isDirectory: true,

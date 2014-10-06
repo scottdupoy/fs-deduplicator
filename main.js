@@ -1,9 +1,11 @@
 var _ = require('underscore');
 var util = require('util');
+var path = require('path');
+var shell = require('shelljs/global');
 var fileFinder = require('./app/FileFinder.js');
 
-var targetDirectory = '/Volumes/Public/hard-disks/_sorted_and_keep/Pictures/13_2010';
-var sourceDirectory = '/Volumes/Public/hard-disks/_to_merge_01/13_2010';
+var targetDirectory = '/Volumes/Public/hard-disks/_sorted_and_keep/Pictures';
+var sourceDirectory = '/Volumes/Public/hard-disks/_to_merge_01';
 //var targetDirectory = '/home/ubuntu/workspace/node_modules';
 //var sourceDirectory = '/home/ubuntu/workspace/node_modules-copy-1';
 
@@ -58,21 +60,44 @@ function checkFiles() {
         }
     }
 
-    newSourceFiles.forEach(function(file) {
-        console.log('NEW:                      ' + file.path);
-        // new so copy
-    });
-    newerSourceFiles.forEach(function(file) {
-        console.log('NEWER:                    ' + file.path);
-        // newer so copy
-    });
-    differentNotNewerSourceFiles.forEach(function(file) {
-        console.log('DIFFERENT (MANUAL CHECK): ' + file.path);
-        // manually check
-    });
     duplicates.forEach(function(file) {
         console.log('DUPLICATE OR OLDER:       ' + file.path);
         // no-op, could check sizes are the same
+    });
+    
+    var targetDirectoryHash = {};
+    var i = 1;
+    newSourceFiles.forEach(function(file) {
+        console.log('NEW: ' + i++ + ' / ' + newSourceFiles.length + ' - ' + file.path);
+        // new so copy
+
+        // if haven't checked this directory already then ensure it exists
+        var sourceFile = sourceDirectory + '/' + file.relativePath;
+        var targetFile = targetDirectory + '/' + file.relativePath;
+        var targetFileDirectory = path.dirname(targetFile);
+        if (!targetDirectoryHash[targetFileDirectory]) {
+            mkdir('-p', targetFileDirectory);
+            targetDirectoryHash[targetFileDirectory] = true;
+        }
+
+        // now copy the file knowing the directory exists
+        cp(sourceFile, targetFile);
+    });
+
+    i = 1;
+    newerSourceFiles.forEach(function(file) {
+        console.log('NEWER: ' + i++ + ' / ' + newerSourceFiles.length + ' - ' + file.path);
+        // newer so copy
+
+        // directory will exist, so just copy the file over
+        var sourceFile = sourceDirectory + '/' + file.relativePath;
+        var targetFile = targetDirectory + '/' + file.relativePath;
+        cp(sourceFile, targetFile);
+    });
+
+    differentNotNewerSourceFiles.forEach(function(file) {
+        console.log('DIFFERENT (MANUAL CHECK): ' + file.path);
+        // manually check
     });
 }
 
