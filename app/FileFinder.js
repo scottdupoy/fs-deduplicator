@@ -1,6 +1,8 @@
 var child_process = require('child_process');
 var _ = require('underscore');
 
+var isMac = process.platform == 'darwin';
+
 module.exports.findFiles = function(root, callback) {
     findFilesRecursively(root, root, [], callback);
 };
@@ -11,8 +13,10 @@ function findFilesRecursively(root, directory, results, callback) {
     // can't use shelljs because we need to capture the output, including the
     // file size and modified timestamp.
     console.log('Searching directory: ' + directory);
-    //MAC WITH YEAR: var command = 'ls -lAT ' + directory;
     var command = 'ls -lA --time-style=long-iso ' + directory;
+    if (isMac) {
+        command = 'ls -lAT ' + directory;
+    }
     child_process.exec(command, function(error, stdout, stderr) {
         if (error) return callback(error);
         parseListingResults(root, directory, results, stdout, callback);
@@ -24,8 +28,7 @@ function parseListingResults(root, directory, results, listing, callback) {
     var subDirectories = [];
     lines.forEach(function(line) {
         var parts = line.split(/\s+/);
-        // MAC: if (parts.length < 9) {
-        if (parts.length < 8) {
+        if (parts.length < (isMac ? 9 : 8)) {
             return;
         }
 
@@ -54,8 +57,14 @@ function parseListingResults(root, directory, results, listing, callback) {
 }
 
 function getEntry(root, directory, line) {
-    // MAC: var groups = /^(.)\S+\s+\S+\s+\S+\s+\S+\s+(\d+)\s+(\d+)\s+(\S+)\s+\d{2}:\d{2}:\d{2}\s(\d{4})\s+(.*)$/.exec(line);
-    var groups = /^(.)\S+\s+\S+\s+\S+\s+\S+\s+(\d+)\s+(\d{4})-(\d{2})-(\d{2})\s+\d{2}:\d{2}\s+(.*)$/.exec(line);
+    var groups = [];
+    if (isMac) {
+        groups = /^(.)\S+\s+\S+\s+\S+\s+\S+\s+(\d+)\s+(\d+)\s+(\S+)\s+\d{2}:\d{2}:\d{2}\s(\d{4})\s+(.*)$/.exec(line);
+    }
+    else {
+        groups = /^(.)\S+\s+\S+\s+\S+\s+\S+\s+(\d+)\s+(\d{4})-(\d{2})-(\d{2})\s+\d{2}:\d{2}\s+(.*)$/.exec(line);
+    }
+
     if (groups[1] == 'd') {
         return {
             isDirectory: true,
@@ -63,14 +72,15 @@ function getEntry(root, directory, line) {
         };
     }
     var path = directory + '/' + groups[6];
+    var modified = isMac ? new Date(groups[5], getMonth(groups[4]) - 1, groups[3]) : new Date(groups[3], groups[4] - 1, groups[5]);
+
     return {
         isDirectory: false,
         path: path,
         root: root,
         relativePath: path.substring(root.length + 1, path.length),
         size: parseInt(groups[2]),
-        //MAC: modified: new Date(groups[5], getMonth(groups[4]) - 1, groups[3]),
-        modified: new Date(groups[3], groups[4] - 1, groups[5]),
+        modified: modified,
     };
 }
 

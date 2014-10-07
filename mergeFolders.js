@@ -4,10 +4,8 @@ var path = require('path');
 var shell = require('shelljs/global');
 var fileFinder = require('./app/FileFinder.js');
 
-var targetDirectory = '/Volumes/Public/hard-disks/_sorted_and_keep/Pictures';
-var sourceDirectory = '/Volumes/Public/hard-disks/_to_merge_01';
-//var targetDirectory = '/home/ubuntu/workspace/node_modules';
-//var sourceDirectory = '/home/ubuntu/workspace/node_modules-copy-1';
+var targetDirectory = '/Volumes/Public/hard-disks/_sorted_and_keep/Pictures/13_2010';
+var sourceDirectory = '/Volumes/Public/hard-disks/_to_merge_01/13_2010';
 
 var targetFiles;
 var sourceFiles;
