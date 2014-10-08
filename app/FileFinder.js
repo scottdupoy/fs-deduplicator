@@ -8,6 +8,8 @@ module.exports.findFiles = function(root, callback) {
 };
 
 function findFilesRecursively(root, directory, results, callback) {
+    // TODO: need to handle links better (ie at all)
+
     // using the ls command to (hopesfully) avoid calling stat on every file
     // individually. note if this was a real tool directory would be sanitised.
     // can't use shelljs because we need to capture the output, including the
