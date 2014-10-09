@@ -3,7 +3,7 @@ var path = require('path');
 var fileFinder = require('./app/FileFinder.js');
 
 var directories = [
-    '/home/ubuntu/workspace'
+    '/Volumes/Public/hard-disks/_sorted_and_keep/Pictures'
 ];
 
 var results = [ ];
