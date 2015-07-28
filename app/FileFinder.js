@@ -19,7 +19,7 @@ function findFilesRecursively(root, directory, results, callback) {
     if (isMac) {
         command = 'ls -lAT "' + directory + '"';
     }
-    child_process.exec(command, function(error, stdout, stderr) {
+    child_process.exec(command, { maxBuffer: 1024*1024 }, function(error, stdout, stderr) {
         if (error) return callback(error);
         parseListingResults(root, directory, results, stdout, callback);
     });

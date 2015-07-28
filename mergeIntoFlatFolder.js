@@ -8,7 +8,7 @@ var dryRun = process.argv.length < 3 || process.argv[2] != "force";
 console.log((dryRun ? 'DRY' : 'LIVE') + ' RUN');
 
 // work through source dirs
-var sourceDirectory = '/Users/scott/Pictures/_to_sort/wedding2';
+var sourceDirectory = '/Users/scott/Pictures/_to_sort';
 
 // files are being put in here with no directory hierarchy
 var targetDirectory = '/Users/scott/Pictures/_to_sort_flat';
