@@ -15,9 +15,9 @@ function findFilesRecursively(root, directory, results, callback) {
     // can't use shelljs because we need to capture the output, including the
     // file size and modified timestamp.
     console.log('Searching directory: ' + directory);
-    var command = 'ls -lA --time-style=long-iso ' + directory;
+    var command = 'ls -lA --time-style=long-iso "' + directory + '"';
     if (isMac) {
-        command = 'ls -lAT ' + directory;
+        command = 'ls -lAT "' + directory + '"';
     }
     child_process.exec(command, function(error, stdout, stderr) {
         if (error) return callback(error);
