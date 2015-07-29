@@ -8,10 +8,10 @@ var dryRun = process.argv.length < 3 || process.argv[2] != "force";
 console.log((dryRun ? 'DRY' : 'LIVE') + ' RUN');
 
 // work through all files in final dirs
-var finalDirectory = "/Users/scott/Pictures/13_2010";
+var finalDirectory = "/Users/scott/Pictures/15_2011";
 
-// files are being put in here with no directory hierarchy
-var flatDirectory = '/Users/scott/Pictures_to_sort_flat/london';
+// files are being removed from this flat directory
+var flatDirectory = '/Users/scott/Pictures/18_2014';
 
 // somewhere to keep the files
 var finalFiles;
@@ -63,7 +63,10 @@ function checkFiles() {
         // is there a flat file basename that matches?
         var flatFile = flatFilesLookup[path.basename(finalFile.path)];
         if (flatFile !== undefined) {
-            if (flatFile.size == finalFile.size) {
+            var tolerance = 0.01;
+            var lowThreshold = flatFile.size * (1.0 - tolerance);
+            var highThreshold = flatFile.size * (1.0 + tolerance);
+            if (finalFile.size >= lowThreshold && finalFile.size <= highThreshold) {
                 console.log('REMOVE: ' + flatFile.path + '   =>  ' + finalFile.path);
                 if (!dryRun) {
                     rm(flatFile.path);
